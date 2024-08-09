@@ -1,6 +1,12 @@
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using ServerLibrary.Helpers;
 using ServerLibrary.Infrastructure;
+using ServerLibrary.Repositories.Contracts;
+using ServerLibrary.Repositories.Implementation;
+using System.Text;
 
 namespace Server
 {
@@ -15,9 +21,49 @@ namespace Server
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.Configure<JwtSection>(builder.Configuration.GetSection("JwtSection"));
+            var jwtSection = builder.Configuration.GetSection(nameof(JwtSection)).Get<JwtSection>();
+
+
             builder.Services.AddDbContext<LibraryContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Your connection is not found"));
+            });
+
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidateLifetime = true,
+                    ValidIssuer = jwtSection!.Issuer,
+                    ValidAudience = jwtSection.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection.Key!))
+                };
+            });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AuthenticatedUser", policy =>
+                    policy.RequireAuthenticatedUser());
+            });
+
+            builder.Services.AddScoped<IUserAccount, UserAccountRepository>();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowBlazorWasm",
+                builder => builder.WithOrigins("https://localhost:7014;http://localhost:5028")
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials());
+
             });
 
             var app = builder.Build();
@@ -27,11 +73,11 @@ namespace Server
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
             app.UseHttpsRedirection();
+            app.UseCors("AllowBlazorWasm");
 
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 

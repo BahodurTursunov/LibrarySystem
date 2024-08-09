@@ -8,26 +8,27 @@ namespace ServerLibrary.Infrastructure
         public LibraryContext(DbContextOptions<LibraryContext> options) : base(options)
         {
         }
-        public DbSet<User> Users { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Book> Books { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<BookDownload> BookDownloads { get; set; }
         public DbSet<SystemRole> SystemRoles { get; set; }
         public DbSet<RefreshTokenInfo> RefreshTokenInfos { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // User Configuration
-            modelBuilder.Entity<User>()
+            modelBuilder.Entity<ApplicationUser>()
                 .HasKey(u => u.Id);
 
-            modelBuilder.Entity<User>()
+            modelBuilder.Entity<ApplicationUser>()
                 .HasMany(u => u.Reviews)
                 .WithOne(r => r.User)
                 .HasForeignKey(r => r.UserId);
 
-            modelBuilder.Entity<User>()
+            modelBuilder.Entity<ApplicationUser>()
                 .HasMany(u => u.BookDownloads)
                 .WithOne(bd => bd.User)
                 .HasForeignKey(bd => bd.UserId);

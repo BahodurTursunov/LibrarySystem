@@ -1,10 +1,10 @@
 ﻿namespace BaseLibrary.Entities
 {
-    public class User : BaseEntity
+    public class ApplicationUser : BaseEntity
     {
-        public string? UserName { get; set; }
+        public string? FullName { get; set; }
         public string? Email { get; set; }
-        public string? PasswordHash { get; set; }
+        public string? Password { get; set; }
         public string? Role { get; set; }
         public DateTime RegisteredAt { get; set; }
         public string? IsBlocked { get; set; }

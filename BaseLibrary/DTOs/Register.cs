@@ -5,13 +5,12 @@ namespace BaseLibrary.DTOs
     public class Register : AccountBase
     {
         [Required]
-        [MinLength(5)]
-        [MaxLength(100)]
+        [StringLength(12, ErrorMessage = "Name length can't be more than 12.")]
         public string? FullName { get; set; }
 
+        [Required]
         [DataType(DataType.Password)]
         [Compare(nameof(Password))]
-        [Required]
         public string? ConfirmPassword { get; set; }
     }
 }
