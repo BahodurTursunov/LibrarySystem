@@ -14,7 +14,6 @@ namespace ServerLibrary.Infrastructure
         public DbSet<Genre> Genres { get; set; }
         public DbSet<BookDownload> BookDownloads { get; set; }
         public DbSet<SystemRole> SystemRoles { get; set; }
-
         public DbSet<RefreshTokenInfo> RefreshTokenInfos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
